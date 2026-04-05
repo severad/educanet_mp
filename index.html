@@ -51,6 +51,12 @@
             }
         }
         
+        /* Třída pro pevné zalomení stránky - platí pro tisk i generování PDF */
+        .page-break {
+            page-break-after: always;
+            break-after: page;
+        }
+
         /* Skrytí šipek u číselných polí pro web */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
@@ -171,8 +177,8 @@
         </table>
         <div class="text-xs mb-6 text-gray-700">*nehodící se škrtněte</div>
 
-        <!-- Část 1 -->
-        <div class="mb-6">
+        <!-- Část 1 (Zalomení po této části na novou stranu) -->
+        <div class="mb-6 page-break">
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
                     <tr class="bg-slate-200">
@@ -292,8 +298,8 @@
             </table>
         </div>
 
-        <!-- Část 3 -->
-        <div class="mb-6">
+        <!-- Část 3 (Zalomení po této části na novou stranu) -->
+        <div class="mb-6 page-break">
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
                     <tr class="bg-slate-200">
@@ -531,7 +537,8 @@
                 filename:     'Hodnotici_tabulka_MP.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak:    { mode: ['css', 'legacy'] } // Nucené respektování CSS page-break vlastností
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
