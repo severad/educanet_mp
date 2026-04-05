@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hodnotící tabulka MP 2025/26</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Knihovna pro export do PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @media print {
             @page {
@@ -49,6 +51,7 @@
             }
         }
         
+        /* Skrytí šipek u číselných polí pro web */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -63,56 +66,80 @@
             background-color: #f0f9ff;
             outline: none;
         }
+        
+        /* Třída aplikovaná při generování PDF pro fixaci vzhledu */
+        .exporting-pdf input, .exporting-pdf textarea {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        .exporting-pdf textarea {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-20">
 
     <!-- Kontrolní panel (Při tisku se skryje) -->
-    <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-end justify-between max-w-6xl mx-auto rounded-b-lg">
-        <div class="flex-1 min-w-[250px]">
+    <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-center justify-between max-w-6xl mx-auto rounded-b-lg border-b border-gray-200">
+        <div class="flex-1 min-w-[200px]">
             <label for="topicSelect" class="block text-sm font-semibold text-gray-700 mb-1">Vyberte téma maturitní práce:</label>
-            <select id="topicSelect" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <select id="topicSelect" class="w-full max-w-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="web">Vývoj aplikací, webová stránka</option>
                 <option value="sit">Návrh počítačové sítě</option>
                 <option value="spec">Specifikace programu</option>
             </select>
         </div>
-        <div class="flex items-center gap-4">
-            <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 text-center">
+        
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 text-center mr-2">
                 <span class="block text-xs text-blue-600 font-bold uppercase">Celkové skóre</span>
-                <span id="floatingTotal" class="text-2xl font-bold text-blue-800">0.00 / 100</span>
+                <span id="floatingTotal" class="text-2xl font-bold text-blue-800 leading-none">0.00 / 100</span>
             </div>
-            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition duration-200 flex items-center gap-2 h-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
-                </svg>
-                Export do PDF
+
+            <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Tisk
+            </button>
+
+            <button onclick="generatePDF()" id="btnPdf" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                Uložit jako PDF
+            </button>
+
+            <button onclick="saveData()" id="btnSave" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11 min-w-[170px] justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                Uložit do prohlížeče
+            </button>
+
+            <button onclick="clearData()" id="btnDelete" class="border border-red-500 text-red-600 hover:bg-red-50 font-medium py-2 px-4 rounded transition duration-200 flex items-center gap-2 h-11 min-w-[130px] justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Smazat
             </button>
         </div>
     </div>
 
-    <!-- Samotný dokument pro tisk -->
+    <!-- Samotný dokument -->
     <div id="printArea" class="print-container max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-sm text-sm">
         
-        <h1 class="text-2xl font-bold text-center mb-6">Hodnotící tabulka MP <span contenteditable="true" class="border-b border-dashed border-gray-400 focus:outline-none">2025/26</span></h1>
+        <h1 class="text-2xl font-bold text-center mb-6">Hodnotící tabulka MP <span id="yearSpan" contenteditable="true" class="border-b border-dashed border-gray-400 focus:outline-none">2025/26</span></h1>
 
         <!-- Hlavička -->
         <table class="w-full mb-1 border-collapse border border-black text-sm">
             <tbody>
                 <tr>
                     <td class="border border-black p-2 bg-slate-200 font-semibold w-[30%]">Název maturitní práce:</td>
-                    <td class="border border-black p-2 w-[55%] relative"><input type="text" class="w-full outline-none bg-transparent"></td>
+                    <td class="border border-black p-2 w-[55%] relative"><input type="text" id="workTitle" class="w-full outline-none bg-transparent"></td>
                     <td class="border border-black p-2 bg-slate-200 font-bold text-center w-[15%]">Celkem bodů</td>
                 </tr>
                 <tr>
                     <td class="border border-black p-2 bg-slate-200 font-semibold leading-tight">Jméno a příjmení autora maturitní<br>práce:</td>
                     <td class="border border-black p-0 align-top">
                         <div class="border-b border-black p-2 h-10 flex items-center">
-                            <span class="whitespace-nowrap">Posudek převzal(a) dne:</span>
-                            <input type="text" class="flex-1 ml-2 bg-transparent outline-none">
+                            <input type="text" id="authorName" class="w-full h-full bg-transparent outline-none font-medium text-base">
                         </div>
                         <div class="p-2 h-10 flex items-center">
-                            <span class="whitespace-nowrap">Podpis žáka:</span>
+                            <span class="whitespace-nowrap mr-2">Podpis žáka:</span>
                         </div>
                     </td>
                     <td class="border border-black p-2 text-center text-3xl font-bold align-middle bg-slate-50" rowspan="2" id="headerTotal">0.00</td>
@@ -120,12 +147,23 @@
                 <tr>
                     <td class="border border-black p-2 bg-slate-200 font-semibold leading-tight">Jméno a příjmení vedoucího/<br>oponenta maturitní práce*:</td>
                     <td class="border border-black p-0 align-top">
-                        <div class="border-b border-black p-2 h-10 flex items-center">
-                            <span class="whitespace-nowrap">Posudek vypracován dne:</span>
-                            <input type="text" class="flex-1 ml-2 bg-transparent outline-none">
+                        <div class="flex border-b border-black">
+                            <div class="p-2 flex-1 border-r border-black flex items-center h-10">
+                                <input type="text" id="reviewerName" class="w-full h-full bg-transparent outline-none font-medium">
+                            </div>
+                            <div class="p-2 w-48 flex items-center h-10">
+                                <span class="whitespace-nowrap text-xs">Převzal(a) dne:</span>
+                                <input type="text" id="dateReceived" class="flex-1 ml-1 bg-transparent outline-none">
+                            </div>
                         </div>
-                        <div class="p-2 h-10 flex items-center">
-                            <span class="whitespace-nowrap">Podpis hodnotitele:</span>
+                        <div class="flex">
+                            <div class="p-2 flex-1 border-r border-black flex items-center h-10">
+                                <span class="whitespace-nowrap mr-2">Podpis hodnotitele:</span>
+                            </div>
+                            <div class="p-2 w-48 flex items-center h-10">
+                                <span class="whitespace-nowrap text-xs">Vypracován dne:</span>
+                                <input type="text" id="dateReviewed" class="flex-1 ml-1 bg-transparent outline-none">
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -380,7 +418,6 @@
             data.rows.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 
-                // Součtová buňka pouze v prvním řádku
                 let avgCell = '';
                 if (index === 0) {
                     avgCell = `<td class="border border-black p-2 align-middle text-center font-bold text-lg bg-slate-50" rowspan="${data.rows.length}" id="sec4-sum">0.00</td>`;
@@ -426,7 +463,6 @@
         function calculateAll() {
             let total = 0;
 
-            // Pomocná fce pro průměr
             const calcAverage = (selector, targetId) => {
                 const inputs = document.querySelectorAll(selector);
                 let sum = 0;
@@ -447,7 +483,6 @@
                 return avg;
             };
 
-            // Pomocná fce pro součet
             const calcSum = (selector, targetId) => {
                 const inputs = document.querySelectorAll(selector);
                 let sum = 0;
@@ -472,7 +507,6 @@
 
             total = s1 + s2 + s3 + s4;
             
-            // Omezíme na max 100 pro jistotu (5+5+15+75)
             if(total > 100) total = 100;
 
             const totalFormatted = total.toFixed(2);
@@ -480,25 +514,146 @@
             document.getElementById('floatingTotal').textContent = totalFormatted + ' / 100';
         }
 
-        // Event listenery pro inputy 1-3
+        // --- PŘIDANÉ FUNKCE PRO UKLÁDÁNÍ A PDF ---
+
+        // 1. Export přímo do PDF
+        function generatePDF() {
+            const btn = document.getElementById('btnPdf');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = 'Generuji PDF...';
+            btn.disabled = true;
+
+            const element = document.getElementById('printArea');
+            element.classList.add('exporting-pdf');
+
+            const opt = {
+                margin:       10, // mm
+                filename:     'Hodnotici_tabulka_MP.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('exporting-pdf');
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        }
+
+        // 2. Uložit data do Local Storage
+        function saveData() {
+            const data = {
+                topic: document.getElementById('topicSelect').value,
+                year: document.getElementById('yearSpan').textContent,
+                workTitle: document.getElementById('workTitle').value,
+                authorName: document.getElementById('authorName').value,
+                reviewerName: document.getElementById('reviewerName').value,
+                dateReceived: document.getElementById('dateReceived').value,
+                dateReviewed: document.getElementById('dateReviewed').value,
+                sec1: Array.from(document.querySelectorAll('.calc-sec1')).map(el => el.value),
+                sec2: Array.from(document.querySelectorAll('.calc-sec2')).map(el => el.value),
+                sec3: Array.from(document.querySelectorAll('.calc-sec3')).map(el => el.value),
+                sec4: Array.from(document.querySelectorAll('.calc-sec4')).map(el => el.value),
+                comments: Array.from(document.querySelectorAll('textarea')).map(el => el.value)
+            };
+
+            localStorage.setItem('mp_form_data', JSON.stringify(data));
+
+            // Vizuální potvrzení na tlačítku
+            const btn = document.getElementById('btnSave');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '✔ Uloženo';
+            btn.classList.add('bg-emerald-800');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('bg-emerald-800');
+            }, 2000);
+        }
+
+        // 3. Načíst data z Local Storage
+        function loadData() {
+            const json = localStorage.getItem('mp_form_data');
+            if(!json) {
+                renderSection4('web'); // Výchozí pokud není uložená cache
+                return;
+            }
+            
+            const data = JSON.parse(json);
+            
+            if(data.topic) {
+                document.getElementById('topicSelect').value = data.topic;
+                renderSection4(data.topic); // Nejdříve sestavíme sekci 4!
+            }
+
+            if(data.year) document.getElementById('yearSpan').textContent = data.year;
+            if(data.workTitle) document.getElementById('workTitle').value = data.workTitle;
+            if(data.authorName) document.getElementById('authorName').value = data.authorName;
+            if(data.reviewerName) document.getElementById('reviewerName').value = data.reviewerName;
+            if(data.dateReceived) document.getElementById('dateReceived').value = data.dateReceived;
+            if(data.dateReviewed) document.getElementById('dateReviewed').value = data.dateReviewed;
+
+            const populate = (selector, arr) => {
+                if(!arr) return;
+                const els = document.querySelectorAll(selector);
+                els.forEach((el, i) => { if(arr[i] !== undefined) el.value = arr[i]; });
+            };
+
+            populate('.calc-sec1', data.sec1);
+            populate('.calc-sec2', data.sec2);
+            populate('.calc-sec3', data.sec3);
+            populate('.calc-sec4', data.sec4);
+            populate('textarea', data.comments);
+
+            document.querySelectorAll('textarea').forEach(ta => autoResize(ta));
+            calculateAll();
+        }
+
+        // 4. Smazat paměť - Dvoufázové potvrzení
+        let deleteConfirm = false;
+        function clearData() {
+            const btn = document.getElementById('btnDelete');
+            
+            if(!deleteConfirm) {
+                deleteConfirm = true;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = 'Klikněte znovu pro smazání';
+                btn.classList.replace('text-red-600', 'text-white');
+                btn.classList.replace('border-red-500', 'border-red-600');
+                btn.classList.add('bg-red-600');
+
+                setTimeout(() => { 
+                    deleteConfirm = false; 
+                    btn.innerHTML = originalHTML;
+                    btn.classList.replace('text-white', 'text-red-600');
+                    btn.classList.replace('border-red-600', 'border-red-500');
+                    btn.classList.remove('bg-red-600');
+                }, 3000); // Po 3 vteřinách se tlačítko vrátí zpět do klidu
+            } else {
+                localStorage.removeItem('mp_form_data');
+                location.reload(); // Jednoduchý reset stránky do výchozího stavu
+            }
+        }
+
+        // --- ZÁKLADNÍ EVENT LISTENERY ---
+
         document.querySelectorAll('.calc-sec1, .calc-sec2, .calc-sec3').forEach(input => {
             input.addEventListener('input', calculateAll);
         });
 
-        // Event listenery pro dynamickou sekci 4 (volá se po jejím vytvoření)
         function attachListenersToSec4() {
             document.querySelectorAll('.calc-sec4').forEach(input => {
                 input.addEventListener('input', calculateAll);
             });
         }
 
-        // Event listener pro změnu tématu
         document.getElementById('topicSelect').addEventListener('change', function(e) {
             renderSection4(e.target.value);
         });
 
         // Inicializace při načtení
-        renderSection4('web');
+        loadData();
 
     </script>
 </body>
