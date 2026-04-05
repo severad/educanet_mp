@@ -7,10 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
             body {
                 background-color: white;
                 padding: 0;
                 margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             .no-print {
                 display: none !important;
@@ -52,35 +58,17 @@
             -moz-appearance: textfield;
             text-align: center;
         }
-        
-        .input-line {
-            border-bottom: 1px solid #d1d5db;
-            outline: none;
-            width: 100%;
-            background: transparent;
-            transition: border-color 0.2s;
-        }
-        .input-line:focus {
-            border-bottom-color: #3b82f6;
-        }
 
-        .table-input {
-            width: 60px;
-            padding: 4px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            outline: none;
-        }
         .table-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 1px #3b82f6;
+            background-color: #f0f9ff;
+            outline: none;
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-20">
 
     <!-- Kontrolní panel (Při tisku se skryje) -->
-    <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-end justify-between max-w-5xl mx-auto rounded-b-lg">
+    <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-end justify-between max-w-6xl mx-auto rounded-b-lg">
         <div class="flex-1 min-w-[250px]">
             <label for="topicSelect" class="block text-sm font-semibold text-gray-700 mb-1">Vyberte téma maturitní práce:</label>
             <select id="topicSelect" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -104,109 +92,105 @@
     </div>
 
     <!-- Samotný dokument pro tisk -->
-    <div id="printArea" class="print-container max-w-4xl mx-auto bg-white p-8 md:p-12 shadow-lg rounded-sm">
+    <div id="printArea" class="print-container max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-sm text-sm">
         
-        <h1 class="text-2xl font-bold text-center mb-8">Hodnotící tabulka MP <span contenteditable="true" class="border-b border-dashed border-gray-400 focus:outline-none">2025/26</span></h1>
+        <h1 class="text-2xl font-bold text-center mb-6">Hodnotící tabulka MP <span contenteditable="true" class="border-b border-dashed border-gray-400 focus:outline-none">2025/26</span></h1>
 
         <!-- Hlavička -->
-        <table class="w-full mb-8 text-sm">
+        <table class="w-full mb-1 border-collapse border border-black text-sm">
             <tbody>
                 <tr>
-                    <td class="py-2 w-1/4 font-semibold">Název maturitní práce:</td>
-                    <td class="py-2 w-2/4 pr-4"><input type="text" class="input-line"></td>
-                    <td class="py-2 w-1/4 align-bottom text-right font-bold text-lg" rowspan="2">
-                        Celkem bodů: <span id="headerTotal" class="border-b-2 border-black inline-block min-w-[60px] text-center">0.00</span>
+                    <td class="border border-black p-2 bg-slate-200 font-semibold w-[30%]">Název maturitní práce:</td>
+                    <td class="border border-black p-2 w-[55%] relative"><input type="text" class="w-full outline-none bg-transparent"></td>
+                    <td class="border border-black p-2 bg-slate-200 font-bold text-center w-[15%]">Celkem bodů</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-2 bg-slate-200 font-semibold leading-tight">Jméno a příjmení autora maturitní<br>práce:</td>
+                    <td class="border border-black p-0 align-top">
+                        <div class="border-b border-black p-2 h-10 flex items-center">
+                            <span class="whitespace-nowrap">Posudek převzal(a) dne:</span>
+                            <input type="text" class="flex-1 ml-2 bg-transparent outline-none">
+                        </div>
+                        <div class="p-2 h-10 flex items-center">
+                            <span class="whitespace-nowrap">Podpis žáka:</span>
+                        </div>
                     </td>
+                    <td class="border border-black p-2 text-center text-3xl font-bold align-middle bg-slate-50" rowspan="2" id="headerTotal">0.00</td>
                 </tr>
                 <tr>
-                    <td class="py-2 font-semibold">Jméno a příjmení autora:</td>
-                    <td class="py-2 pr-4"><input type="text" class="input-line"></td>
-                </tr>
-                <tr>
-                    <td class="py-2 font-semibold">Podpis žáka:</td>
-                    <td class="py-2 pr-4"><input type="text" class="input-line" disabled></td>
-                    <td class="py-2">Posudek převzal(a) dne: <input type="text" class="input-line w-32 inline-block"></td>
-                </tr>
-                <tr>
-                    <td class="py-2 font-semibold">Vedoucí / Oponent*:</td>
-                    <td class="py-2 pr-4">
-                        <input type="text" class="input-line w-full mb-1" placeholder="Jméno a příjmení">
-                        <span class="text-xs text-gray-500">*nehodící se škrtněte</span>
+                    <td class="border border-black p-2 bg-slate-200 font-semibold leading-tight">Jméno a příjmení vedoucího/<br>oponenta maturitní práce*:</td>
+                    <td class="border border-black p-0 align-top">
+                        <div class="border-b border-black p-2 h-10 flex items-center">
+                            <span class="whitespace-nowrap">Posudek vypracován dne:</span>
+                            <input type="text" class="flex-1 ml-2 bg-transparent outline-none">
+                        </div>
+                        <div class="p-2 h-10 flex items-center">
+                            <span class="whitespace-nowrap">Podpis hodnotitele:</span>
+                        </div>
                     </td>
-                    <td class="py-2">Posudek vypracován dne: <input type="text" class="input-line w-32 inline-block"></td>
-                </tr>
-                <tr>
-                    <td class="py-2 font-semibold">Podpis hodnotitele:</td>
-                    <td class="py-2 pr-4"><input type="text" class="input-line" disabled></td>
-                    <td class="py-2"></td>
                 </tr>
             </tbody>
         </table>
+        <div class="text-xs mb-6 text-gray-700">*nehodící se škrtněte</div>
 
         <!-- Část 1 -->
-        <div class="mb-8">
-            <table class="w-full border-collapse border border-gray-300 text-sm">
+        <div class="mb-6">
+            <table class="w-full border-collapse border border-black text-sm">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border border-gray-300 p-2 text-left w-1/4">1. Grafické a typografické zpracování</th>
-                        <th class="border border-gray-300 p-2 text-left w-1/2">Popis (0-5 bodů)</th>
-                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    <tr class="bg-slate-200">
+                        <th colspan="2" class="border border-black p-2 text-center text-base">1. Grafické a typografické zpracování (max. 5 bodů)</th>
+                        <th class="border border-black p-2 text-center w-20">0-5 bodů</th>
+                        <th class="border border-black p-2 text-center w-24 leading-tight">Průměr<br>bodů</th>
                     </tr>
                 </thead>
                 <tbody id="sec1-body">
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Titulní list, prohlášení a poděkování</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">správný název školy, správně uvedené jméno autora a vedoucího, celková grafická úhlednost a přehlednost</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 font-bold w-[30%] bg-slate-50">Titulní list, prohlášení a poděkování</td>
+                        <td class="border border-black p-2 text-xs">správný název školy, správně uvedené jméno autora a vedoucího, celková grafická úhlednost a přehlednost</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
+                        <td class="border border-black p-2 align-middle text-center font-bold text-lg bg-slate-50" rowspan="9" id="sec1-avg">0.00</td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Strana s anotací a klíčovými slovy</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">uvedená anotace a klíčová slova (včetně cizího jazyka), celková grafická úhlednost a přehlednost</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Strana s anotací a klíčovými slovy</td>
+                        <td class="border border-black p-2 text-xs">uvedená anotace a klíčová slova (včetně cizího jazyka), celková grafická úhlednost a přehlednost</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Strana s obsahem</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">obsah je generovaný, správně číslovaný a přehledný</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Strana s obsahem</td>
+                        <td class="border border-black p-2 text-xs">obsah je generovaný, správně číslovaný a přehledný</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Strany vlastního textu</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">dodržena normostrana (patkové písmo, velikost 12, řádkování 1,5, okraje stran), správný text záhlaví, správné číslování stránek, zarovnání textu do bloku atd.</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50" rowspan="4">Strany vlastního textu</td>
+                        <td class="border border-black p-2 text-xs">dodržena normostrana (patkové písmo, velikost 12, řádkování 1,5, okraje stran), správný text záhlaví, správné číslování stránek, zarovnání textu do bloku atd.</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Názvy kapitol</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">velikost a členění kapitol a podkapitol, jejich číslování, mezery mezi kapitolami</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 text-xs">názvy kapitol (velikost a členění kapitol a podkapitol, jejich číslování, mezery mezi kapitolami)</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Odstavce</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">jednotné odsazení, členění, jednotný vzhled</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 text-xs">odstavce (jednotné odsazení, členění, jednotný vzhled)</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Grafy, obrázky, tabulky a jejich zpracování</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">množství, velikost, přehlednost, popisky</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 text-xs">grafy, obrázky, tabulky a jejich zpracování (množství, velikost, přehlednost, popisky)</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Strana zdrojů</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">rozdělení zdrojů dle formy (tištěné a elektronické) a jejich očíslování, celková grafická úhlednost a přehlednost, grafická úhlednost poznámek pod čarou</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Strana zdrojů</td>
+                        <td class="border border-black p-2 text-xs">rozdělení zdrojů dle formy (tištěné a elektronické) a jejich očíslování, celková grafická úhlednost a přehlednost, grafická úhlednost poznámek pod čarou</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Ostatní</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">grafická úhlednost, přehlednost a jednotnost práce jako celku</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
-                    </tr>
-                    <tr class="bg-gray-50 font-bold">
-                        <td class="border border-gray-300 p-2 text-right" colspan="2">Průměr bodů (max. 5):</td>
-                        <td class="border border-gray-300 p-2 text-center" id="sec1-avg">0.00</td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Ostatní</td>
+                        <td class="border border-black p-2 text-xs">grafická úhlednost, přehlednost a jednotnost práce jako celku</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
-                        <td class="border border-gray-300 p-2" colspan="2">
-                            <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                        <td class="border border-black p-4 font-bold bg-slate-200 text-center align-middle">Slovní komentář</td>
+                        <td class="border border-black p-0 align-top" colspan="3">
+                            <textarea class="w-full p-2 outline-none bg-transparent min-h-[60px] resize-none" oninput="autoResize(this)"></textarea>
                         </td>
                     </tr>
                 </tbody>
@@ -214,59 +198,56 @@
         </div>
 
         <!-- Část 2 -->
-        <div class="mb-8">
-            <table class="w-full border-collapse border border-gray-300 text-sm">
+        <div class="mb-6">
+            <table class="w-full border-collapse border border-black text-sm">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border border-gray-300 p-2 text-left w-1/4">2. Jazykové zpracování</th>
-                        <th class="border border-gray-300 p-2 text-left w-1/2">Popis (0-5 bodů)</th>
-                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    <tr class="bg-slate-200">
+                        <th colspan="2" class="border border-black p-2 text-center text-base">2. Jazykové zpracování (max. 5 bodů)</th>
+                        <th class="border border-black p-2 text-center w-20">0-5 bodů</th>
+                        <th class="border border-black p-2 text-center w-24 leading-tight">Průměr<br>bodů</th>
                     </tr>
                 </thead>
                 <tbody id="sec2-body">
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Překlepy</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">absence překlepů a neúmyslných chyb</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                        <td class="border border-black p-2 font-bold w-[30%] bg-slate-50">Překlepy</td>
+                        <td class="border border-black p-2 text-xs">absence překlepů a neúmyslných chyb</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
+                        <td class="border border-black p-2 align-middle text-center font-bold text-lg bg-slate-50" rowspan="7" id="sec2-avg">0.00</td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Chyby v interpunkci</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">nechybí čárky v souvětí, pomlčky a tečky za větou</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Chyby v interpunkci</td>
+                        <td class="border border-black p-2 text-xs">nechybí čárky v souvětí, pomlčky a tečky za větou</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Hrubé chyby</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">správně psaná velká/malá písmena, s/z, y/i, mě/mně apod., užívání zkratek (např. s. r. o.) a symbolů v souladu s normou (značky jako %, §)</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Hrubé chyby</td>
+                        <td class="border border-black p-2 text-xs">správně psaná velká/malá písmena, s/z, y/i, mě/mně apod., užívání zkratek (např. s. r. o.) a symbolů v souladu s normou (značky jako %, §)</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Srozumitelnost myšlenek, návaznost textu</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">schopnost jasně, srozumitelně a logicky se vyjadřovat, návaznost kapitol a podkapitol</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Srozumitelnost myšlenek, návaznost textu</td>
+                        <td class="border border-black p-2 text-xs">schopnost jasně, srozumitelně a logicky se vyjadřovat, návaznost kapitol a podkapitol</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Bohatost jazyka</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">neopakování slov či slovních základů</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Bohatost jazyka</td>
+                        <td class="border border-black p-2 text-xs">neopakování slov či slovních základů</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Odborná terminologie</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">správné užití termínu, jeho vysvětlení</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Odborná terminologie</td>
+                        <td class="border border-black p-2 text-xs">správné užití termínu, jeho vysvětlení</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Stylistika odborného textu</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">spisovný odborný jazyk, stavba vět</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
-                    </tr>
-                    <tr class="bg-gray-50 font-bold">
-                        <td class="border border-gray-300 p-2 text-right" colspan="2">Průměr bodů (max. 5):</td>
-                        <td class="border border-gray-300 p-2 text-center" id="sec2-avg">0.00</td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Stylistika odborného textu</td>
+                        <td class="border border-black p-2 text-xs">spisovný odborný jazyk, stavba vět</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
-                        <td class="border border-gray-300 p-2" colspan="2">
-                            <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                        <td class="border border-black p-4 font-bold bg-slate-200 text-center align-middle">Slovní komentář</td>
+                        <td class="border border-black p-0 align-top" colspan="3">
+                            <textarea class="w-full p-2 outline-none bg-transparent min-h-[60px] resize-none" oninput="autoResize(this)"></textarea>
                         </td>
                     </tr>
                 </tbody>
@@ -274,54 +255,51 @@
         </div>
 
         <!-- Část 3 -->
-        <div class="mb-8">
-            <table class="w-full border-collapse border border-gray-300 text-sm">
+        <div class="mb-6">
+            <table class="w-full border-collapse border border-black text-sm">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border border-gray-300 p-2 text-left w-1/4">3. Obsahová úroveň</th>
-                        <th class="border border-gray-300 p-2 text-left w-1/2">Popis (0-15 bodů)</th>
-                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    <tr class="bg-slate-200">
+                        <th colspan="2" class="border border-black p-2 text-center text-base">3. Obsahová úroveň (max. 15 bodů)</th>
+                        <th class="border border-black p-2 text-center w-20">0-15 bodů</th>
+                        <th class="border border-black p-2 text-center w-24 leading-tight">Průměr<br>bodů</th>
                     </tr>
                 </thead>
                 <tbody id="sec3-body">
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Přístup žáka k práci</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">spolehlivost, iniciativa, komunikace s vedoucím, četnost konzultací (oponent nemůže posoudit – hodnocení neuvádí)</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                        <td class="border border-black p-2 font-bold w-[30%] bg-slate-50">Přístup žáka k práci</td>
+                        <td class="border border-black p-2 text-xs">spolehlivost, iniciativa, komunikace s vedoucím, četnost konzultací (oponent nemůže posoudit – hodnocení neuvádí)</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 p-2 table-input"></td>
+                        <td class="border border-black p-2 align-middle text-center font-bold text-lg bg-slate-50" rowspan="6" id="sec3-avg">0.00</td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Úvod</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">stanovení cílů práce, adekvátnost cílů, důvody výběru tématu, přínos práce</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Úvod</td>
+                        <td class="border border-black p-2 text-xs">stanovení cílů práce, adekvátnost cílů, důvody výběru tématu, přínos práce</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Teoretická část</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">popis problematiky, logická návaznost kapitol, práce se zdroji, mylné informace</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Teoretická část</td>
+                        <td class="border border-black p-2 text-xs">popis problematiky, logická návaznost kapitol, práce se zdroji, mylné informace</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Praktická část</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">stanovení hypotéz, popis metodiky (včetně popisu výběru vzorku), výsledky šetření, ověření a analýza hypotéz, konceptuálnost</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Praktická část</td>
+                        <td class="border border-black p-2 text-xs">stanovení hypotéz, popis metodiky (včetně popisu výběru vzorku), výsledky šetření, ověření a analýza hypotéz, konceptuálnost</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Závěr</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">naplnění cílů práce, analýza přínosu práce, zhodnocení výsledků</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Závěr</td>
+                        <td class="border border-black p-2 text-xs">naplnění cílů práce, analýza přínosu práce, zhodnocení výsledků</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Zdroje</td>
-                        <td class="border border-gray-300 p-2 text-xs text-gray-600">kvalita a množství zdrojů, správná forma uvedení zdrojů</td>
-                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
-                    </tr>
-                    <tr class="bg-gray-50 font-bold">
-                        <td class="border border-gray-300 p-2 text-right" colspan="2">Průměr bodů (max. 15):</td>
-                        <td class="border border-gray-300 p-2 text-center" id="sec3-avg">0.00</td>
+                        <td class="border border-black p-2 font-bold bg-slate-50">Zdroje</td>
+                        <td class="border border-black p-2 text-xs">kvalita a množství zdrojů, správná forma uvedení zdrojů</td>
+                        <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 p-2 table-input"></td>
                     </tr>
                     <tr>
-                        <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
-                        <td class="border border-gray-300 p-2" colspan="2">
-                            <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                        <td class="border border-black p-4 font-bold bg-slate-200 text-center align-middle">Slovní komentář</td>
+                        <td class="border border-black p-0 align-top" colspan="3">
+                            <textarea class="w-full p-2 outline-none bg-transparent min-h-[60px] resize-none" oninput="autoResize(this)"></textarea>
                         </td>
                     </tr>
                 </tbody>
@@ -329,13 +307,15 @@
         </div>
 
         <!-- Část 4 (Dynamická) -->
-        <div class="mb-8">
-            <table class="w-full border-collapse border border-gray-300 text-sm">
+        <div class="mb-6">
+            <table class="w-full border-collapse border border-black text-sm">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border border-gray-300 p-2 text-left w-1/4">4. Odborná úroveň</th>
-                        <th class="border border-gray-300 p-2 text-left w-1/2" id="sec4-title">Vývoj aplikací, webová stránka</th>
-                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    <tr class="bg-slate-200">
+                        <th colspan="2" class="border border-black p-2 text-center text-base">
+                            4. Odborná úroveň: <span id="sec4-title" class="font-bold">Vývoj aplikací, webová stránka</span>
+                        </th>
+                        <th class="border border-black p-2 text-center w-20">Body</th>
+                        <th class="border border-black p-2 text-center w-24 leading-tight">Součet<br>bodů</th>
                     </tr>
                 </thead>
                 <tbody id="sec4-body">
@@ -397,36 +377,37 @@
             const tbody = document.getElementById('sec4-body');
             tbody.innerHTML = '';
 
-            data.rows.forEach(row => {
+            data.rows.forEach((row, index) => {
                 const tr = document.createElement('tr');
+                
+                // Součtová buňka pouze v prvním řádku
+                let avgCell = '';
+                if (index === 0) {
+                    avgCell = `<td class="border border-black p-2 align-middle text-center font-bold text-lg bg-slate-50" rowspan="${data.rows.length}" id="sec4-sum">0.00</td>`;
+                }
+
                 tr.innerHTML = `
-                    <td class="border border-gray-300 p-2">
-                        <div class="font-medium">${row.name}</div>
+                    <td class="border border-black p-2 bg-slate-50 w-[30%]">
+                        <div class="font-bold">${row.name}</div>
                         <div class="text-xs font-bold text-gray-500 mt-1">${row.range}</div>
                     </td>
-                    <td class="border border-gray-300 p-2 text-xs text-gray-600">${row.desc}</td>
-                    <td class="border border-gray-300 p-2 text-center">
-                        <input type="number" min="0" max="${row.max}" step="0.5" class="table-input calc-sec4">
+                    <td class="border border-black p-2 text-xs">${row.desc}</td>
+                    <td class="border border-black p-0 align-middle">
+                        <input type="number" min="0" max="${row.max}" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec4 p-2 table-input">
                     </td>
+                    ${avgCell}
                 `;
                 tbody.appendChild(tr);
             });
 
-            // Přidání součtového řádku a komentáře
-            const trTotal = document.createElement('tr');
-            trTotal.className = 'bg-gray-50 font-bold';
-            trTotal.innerHTML = `
-                <td class="border border-gray-300 p-2 text-right" colspan="2">Součet bodů (max. 75):</td>
-                <td class="border border-gray-300 p-2 text-center" id="sec4-sum">0.00</td>
-            `;
-            tbody.appendChild(trTotal);
-
             const trComment = document.createElement('tr');
             trComment.innerHTML = `
-                <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
-                <td class="border border-gray-300 p-2" colspan="2">
-                    <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
-                    <div class="text-xs text-gray-500 mt-1">*možnost přidělit body v daném rozmezí</div>
+                <td class="border border-black p-4 font-bold bg-slate-200 text-center align-middle">
+                    Slovní komentář
+                    <div class="text-xs text-gray-600 mt-2 font-normal text-left leading-tight">*možnost přidělit body v daném rozmezí</div>
+                </td>
+                <td class="border border-black p-0 align-top" colspan="3">
+                    <textarea class="w-full p-2 outline-none bg-transparent min-h-[80px] resize-none" oninput="autoResize(this)"></textarea>
                 </td>
             `;
             tbody.appendChild(trComment);
@@ -451,7 +432,6 @@
                 let sum = 0;
                 let count = 0;
                 inputs.forEach(input => {
-                    // Validace max/min
                     let val = parseFloat(input.value);
                     if (!isNaN(val)) {
                         let max = parseFloat(input.getAttribute('max'));
