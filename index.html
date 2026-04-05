@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hodnotící tabulka MP 2025/26</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            input, textarea {
+                border: none !important;
+                resize: none;
+                background-color: transparent !important;
+            }
+            input[type="number"] {
+                -moz-appearance: textfield;
+            }
+            input[type="number"]::-webkit-outer-spin-button,
+            input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            table {
+                page-break-inside: avoid;
+            }
+            textarea {
+                overflow: hidden;
+            }
+        }
+        
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            text-align: center;
+        }
+        
+        .input-line {
+            border-bottom: 1px solid #d1d5db;
+            outline: none;
+            width: 100%;
+            background: transparent;
+            transition: border-color 0.2s;
+        }
+        .input-line:focus {
+            border-bottom-color: #3b82f6;
+        }
+
+        .table-input {
+            width: 60px;
+            padding: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            outline: none;
+        }
+        .table-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 pb-20">
+
+    <!-- Kontrolní panel (Při tisku se skryje) -->
+    <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-end justify-between max-w-5xl mx-auto rounded-b-lg">
+        <div class="flex-1 min-w-[250px]">
+            <label for="topicSelect" class="block text-sm font-semibold text-gray-700 mb-1">Vyberte téma maturitní práce:</label>
+            <select id="topicSelect" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="web">Vývoj aplikací, webová stránka</option>
+                <option value="sit">Návrh počítačové sítě</option>
+                <option value="spec">Specifikace programu</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 text-center">
+                <span class="block text-xs text-blue-600 font-bold uppercase">Celkové skóre</span>
+                <span id="floatingTotal" class="text-2xl font-bold text-blue-800">0.00 / 100</span>
+            </div>
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition duration-200 flex items-center gap-2 h-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+                </svg>
+                Export do PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Samotný dokument pro tisk -->
+    <div id="printArea" class="print-container max-w-4xl mx-auto bg-white p-8 md:p-12 shadow-lg rounded-sm">
+        
+        <h1 class="text-2xl font-bold text-center mb-8">Hodnotící tabulka MP <span contenteditable="true" class="border-b border-dashed border-gray-400 focus:outline-none">2025/26</span></h1>
+
+        <!-- Hlavička -->
+        <table class="w-full mb-8 text-sm">
+            <tbody>
+                <tr>
+                    <td class="py-2 w-1/4 font-semibold">Název maturitní práce:</td>
+                    <td class="py-2 w-2/4 pr-4"><input type="text" class="input-line"></td>
+                    <td class="py-2 w-1/4 align-bottom text-right font-bold text-lg" rowspan="2">
+                        Celkem bodů: <span id="headerTotal" class="border-b-2 border-black inline-block min-w-[60px] text-center">0.00</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="py-2 font-semibold">Jméno a příjmení autora:</td>
+                    <td class="py-2 pr-4"><input type="text" class="input-line"></td>
+                </tr>
+                <tr>
+                    <td class="py-2 font-semibold">Podpis žáka:</td>
+                    <td class="py-2 pr-4"><input type="text" class="input-line" disabled></td>
+                    <td class="py-2">Posudek převzal(a) dne: <input type="text" class="input-line w-32 inline-block"></td>
+                </tr>
+                <tr>
+                    <td class="py-2 font-semibold">Vedoucí / Oponent*:</td>
+                    <td class="py-2 pr-4">
+                        <input type="text" class="input-line w-full mb-1" placeholder="Jméno a příjmení">
+                        <span class="text-xs text-gray-500">*nehodící se škrtněte</span>
+                    </td>
+                    <td class="py-2">Posudek vypracován dne: <input type="text" class="input-line w-32 inline-block"></td>
+                </tr>
+                <tr>
+                    <td class="py-2 font-semibold">Podpis hodnotitele:</td>
+                    <td class="py-2 pr-4"><input type="text" class="input-line" disabled></td>
+                    <td class="py-2"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Část 1 -->
+        <div class="mb-8">
+            <table class="w-full border-collapse border border-gray-300 text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 p-2 text-left w-1/4">1. Grafické a typografické zpracování</th>
+                        <th class="border border-gray-300 p-2 text-left w-1/2">Popis (0-5 bodů)</th>
+                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    </tr>
+                </thead>
+                <tbody id="sec1-body">
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Titulní list, prohlášení a poděkování</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">správný název školy, správně uvedené jméno autora a vedoucího, celková grafická úhlednost a přehlednost</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Strana s anotací a klíčovými slovy</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">uvedená anotace a klíčová slova (včetně cizího jazyka), celková grafická úhlednost a přehlednost</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Strana s obsahem</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">obsah je generovaný, správně číslovaný a přehledný</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Strany vlastního textu</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">dodržena normostrana (patkové písmo, velikost 12, řádkování 1,5, okraje stran), správný text záhlaví, správné číslování stránek, zarovnání textu do bloku atd.</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Názvy kapitol</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">velikost a členění kapitol a podkapitol, jejich číslování, mezery mezi kapitolami</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Odstavce</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">jednotné odsazení, členění, jednotný vzhled</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Grafy, obrázky, tabulky a jejich zpracování</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">množství, velikost, přehlednost, popisky</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Strana zdrojů</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">rozdělení zdrojů dle formy (tištěné a elektronické) a jejich očíslování, celková grafická úhlednost a přehlednost, grafická úhlednost poznámek pod čarou</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Ostatní</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">grafická úhlednost, přehlednost a jednotnost práce jako celku</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec1"></td>
+                    </tr>
+                    <tr class="bg-gray-50 font-bold">
+                        <td class="border border-gray-300 p-2 text-right" colspan="2">Průměr bodů (max. 5):</td>
+                        <td class="border border-gray-300 p-2 text-center" id="sec1-avg">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
+                        <td class="border border-gray-300 p-2" colspan="2">
+                            <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Část 2 -->
+        <div class="mb-8">
+            <table class="w-full border-collapse border border-gray-300 text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 p-2 text-left w-1/4">2. Jazykové zpracování</th>
+                        <th class="border border-gray-300 p-2 text-left w-1/2">Popis (0-5 bodů)</th>
+                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    </tr>
+                </thead>
+                <tbody id="sec2-body">
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Překlepy</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">absence překlepů a neúmyslných chyb</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Chyby v interpunkci</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">nechybí čárky v souvětí, pomlčky a tečky za větou</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Hrubé chyby</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">správně psaná velká/malá písmena, s/z, y/i, mě/mně apod., užívání zkratek (např. s. r. o.) a symbolů v souladu s normou (značky jako %, §)</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Srozumitelnost myšlenek, návaznost textu</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">schopnost jasně, srozumitelně a logicky se vyjadřovat, návaznost kapitol a podkapitol</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Bohatost jazyka</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">neopakování slov či slovních základů</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Odborná terminologie</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">správné užití termínu, jeho vysvětlení</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Stylistika odborného textu</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">spisovný odborný jazyk, stavba vět</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="5" step="0.5" class="table-input calc-sec2"></td>
+                    </tr>
+                    <tr class="bg-gray-50 font-bold">
+                        <td class="border border-gray-300 p-2 text-right" colspan="2">Průměr bodů (max. 5):</td>
+                        <td class="border border-gray-300 p-2 text-center" id="sec2-avg">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
+                        <td class="border border-gray-300 p-2" colspan="2">
+                            <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Část 3 -->
+        <div class="mb-8">
+            <table class="w-full border-collapse border border-gray-300 text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 p-2 text-left w-1/4">3. Obsahová úroveň</th>
+                        <th class="border border-gray-300 p-2 text-left w-1/2">Popis (0-15 bodů)</th>
+                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    </tr>
+                </thead>
+                <tbody id="sec3-body">
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Přístup žáka k práci</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">spolehlivost, iniciativa, komunikace s vedoucím, četnost konzultací (oponent nemůže posoudit – hodnocení neuvádí)</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Úvod</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">stanovení cílů práce, adekvátnost cílů, důvody výběru tématu, přínos práce</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Teoretická část</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">popis problematiky, logická návaznost kapitol, práce se zdroji, mylné informace</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Praktická část</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">stanovení hypotéz, popis metodiky (včetně popisu výběru vzorku), výsledky šetření, ověření a analýza hypotéz, konceptuálnost</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Závěr</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">naplnění cílů práce, analýza přínosu práce, zhodnocení výsledků</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Zdroje</td>
+                        <td class="border border-gray-300 p-2 text-xs text-gray-600">kvalita a množství zdrojů, správná forma uvedení zdrojů</td>
+                        <td class="border border-gray-300 p-2 text-center"><input type="number" min="0" max="15" step="0.5" class="table-input calc-sec3"></td>
+                    </tr>
+                    <tr class="bg-gray-50 font-bold">
+                        <td class="border border-gray-300 p-2 text-right" colspan="2">Průměr bodů (max. 15):</td>
+                        <td class="border border-gray-300 p-2 text-center" id="sec3-avg">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
+                        <td class="border border-gray-300 p-2" colspan="2">
+                            <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Část 4 (Dynamická) -->
+        <div class="mb-8">
+            <table class="w-full border-collapse border border-gray-300 text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 p-2 text-left w-1/4">4. Odborná úroveň</th>
+                        <th class="border border-gray-300 p-2 text-left w-1/2" id="sec4-title">Vývoj aplikací, webová stránka</th>
+                        <th class="border border-gray-300 p-2 text-center w-32">Body</th>
+                    </tr>
+                </thead>
+                <tbody id="sec4-body">
+                    <!-- Bude naplněno pomocí JavaScriptu -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        // Data pro sekci 4 na základě tématu
+        const topicsData = {
+            "web": {
+                title: "Vývoj aplikací, webová stránka",
+                rows: [
+                    { name: 'Uživatelské rozhraní*', range: '0–12 bodů', desc: 'Estetika a vizuální atraktivita, uživatelská přívětivost, responzivita a přizpůsobení', max: 12 },
+                    { name: 'Zdrojový kód*', range: '0–15 bodů', desc: 'Čistota a čitelnost kódu, použití správných programovacích konvencí, efektivnost a optimalizace kódu', max: 15 },
+                    { name: 'Funkcionalita*', range: '0–15 bodů', desc: 'Kompletnost a správné fungování, odolnost proti chybám a bezpečnost, efektivní zpracování vstupů a výstupů', max: 15 },
+                    { name: 'Originalita a kreativita*', range: '0–10 bodů', desc: 'Inovativnost a originalita nápadů, kreativní použití technologií', max: 10 },
+                    { name: 'Testování a ladění*', range: '0–8 bodů', desc: 'Úplnost a efektivita testovacích scénářů, kvalita a efektivita ladění chyb', max: 8 },
+                    { name: 'Vhodnost technických řešení*', range: '0–10 bodů', desc: 'Vhodnost použitých technologií, efektivnost a správnost implementace', max: 10 },
+                    { name: 'Celkový dojem a přínos*', range: '0–5 bodů', desc: 'Celkový dojem z projektu, přínos projektu vzhledem k cílům a potřebám', max: 5 }
+                ]
+            },
+            "sit": {
+                title: "Návrh počítačové sítě",
+                rows: [
+                    { name: 'Analýza situace*', range: '0–6 bodů', desc: 'analýza lokality pro návrh sítě a dále potřeb a požadavků firmy', max: 6 },
+                    { name: 'Návrh PC sítě*', range: '0–18 bodů', desc: 'popis řešené problematiky, správnost navrženého řešení PC sítě/sítí', max: 18 },
+                    { name: 'Zabezpečení PC sítě*', range: '0–12 bodů', desc: 'popis a teoretická funkčnost zabezpečení PC sítě/sítí proti možným útokům nebo šíření škodlivého software', max: 12 },
+                    { name: 'Zabezpečení dat firmy*', range: '0–9 bodů', desc: 'funkčnost navrhovaného řešení pro zálohy dat pracovníků firmy', max: 9 },
+                    { name: 'Nastavení DHCP serveru a IP adres*', range: '0–6 bodů', desc: 'nastavení DHCP by mělo odpovídat potřebám podniku a mít logické uspořádání; stejně tak koncová zařízení s pevně danou IP adresou', max: 6 },
+                    { name: 'Výběr HW*', range: '0–9 bodů', desc: 'použití HW vhodného k zabezpečení všech požadavků firmy', max: 9 },
+                    { name: 'Výběr síťových prvků*', range: '0–9 bodů', desc: 'použití vhodných síťových prvků pro tento typ sítě/sítí', max: 9 },
+                    { name: 'Pokrytí firmy Wi-Fi*', range: '0–6 bodů', desc: 'řešení pokrytí firmy Wi-Fi signálem pro možnost připojení k internetu odkudkoliv i pro hosty', max: 6 }
+                ]
+            },
+            "spec": {
+                title: "Specifikace programu",
+                rows: [
+                    { name: 'Trendy*', range: '0–6 bodů', desc: 'sledování trendů v popisované oblasti, aktuálnost zvolených programů', max: 6 },
+                    { name: 'Analýza*', range: '0–6 bodů', desc: 'stanovení cílů práce, adekvátnost cílů, důvody jejich výběru', max: 6 },
+                    { name: 'Problematika*', range: '0–12 bodů', desc: 'popis problematiky, logická návaznost a provázanost částí tématu, hloubka ponoření se do problému', max: 12 },
+                    { name: 'Implementace*', range: '0–15 bodů', desc: 'rozsah a detailnost vlastního popisu, kvalita a vhodnost vlastní tvorby (obrázky/videa)', max: 15 },
+                    { name: 'Výsledky práce*', range: '0–12 bodů', desc: 'výsledky a splnění cílů z analýzy, doporučení vyplývající z práce', max: 12 },
+                    { name: 'Přínos*', range: '0–6 bodů', desc: 'využitelnost a pochopitelnost představeného materiálu', max: 6 },
+                    { name: 'Porovnání*', range: '0–6 bodů', desc: 'porovnání s jinými programy – relevantnost výběru konkurence', max: 6 },
+                    { name: 'Citace*', range: '0–6 bodů', desc: 'kvalita a množství zdrojů, relevantnost a použití uvedených zdrojů', max: 6 },
+                    { name: 'Interface*', range: '0–6 bodů', desc: 'uživatelská přívětivost, srozumitelnost a čtivost práce', max: 6 }
+                ]
+            }
+        };
+
+        // Generování sekce 4 podle výběru v selectu
+        function renderSection4(topicKey) {
+            const data = topicsData[topicKey];
+            document.getElementById('sec4-title').textContent = data.title;
+            const tbody = document.getElementById('sec4-body');
+            tbody.innerHTML = '';
+
+            data.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="border border-gray-300 p-2">
+                        <div class="font-medium">${row.name}</div>
+                        <div class="text-xs font-bold text-gray-500 mt-1">${row.range}</div>
+                    </td>
+                    <td class="border border-gray-300 p-2 text-xs text-gray-600">${row.desc}</td>
+                    <td class="border border-gray-300 p-2 text-center">
+                        <input type="number" min="0" max="${row.max}" step="0.5" class="table-input calc-sec4">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Přidání součtového řádku a komentáře
+            const trTotal = document.createElement('tr');
+            trTotal.className = 'bg-gray-50 font-bold';
+            trTotal.innerHTML = `
+                <td class="border border-gray-300 p-2 text-right" colspan="2">Součet bodů (max. 75):</td>
+                <td class="border border-gray-300 p-2 text-center" id="sec4-sum">0.00</td>
+            `;
+            tbody.appendChild(trTotal);
+
+            const trComment = document.createElement('tr');
+            trComment.innerHTML = `
+                <td class="border border-gray-300 p-2 font-medium">Slovní komentář</td>
+                <td class="border border-gray-300 p-2" colspan="2">
+                    <textarea class="w-full p-2 border border-gray-200 rounded min-h-[60px] text-sm" oninput="autoResize(this)"></textarea>
+                    <div class="text-xs text-gray-500 mt-1">*možnost přidělit body v daném rozmezí</div>
+                </td>
+            `;
+            tbody.appendChild(trComment);
+
+            attachListenersToSec4();
+            calculateAll();
+        }
+
+        // Automatické zvětšení textarey
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        // Výpočet průměru / součtu na základě tříd
+        function calculateAll() {
+            let total = 0;
+
+            // Pomocná fce pro průměr
+            const calcAverage = (selector, targetId) => {
+                const inputs = document.querySelectorAll(selector);
+                let sum = 0;
+                let count = 0;
+                inputs.forEach(input => {
+                    // Validace max/min
+                    let val = parseFloat(input.value);
+                    if (!isNaN(val)) {
+                        let max = parseFloat(input.getAttribute('max'));
+                        if (val > max) { val = max; input.value = max; }
+                        if (val < 0) { val = 0; input.value = 0; }
+                        
+                        sum += val;
+                        count++;
+                    }
+                });
+                const avg = count > 0 ? (sum / count) : 0;
+                document.getElementById(targetId).textContent = avg.toFixed(2);
+                return avg;
+            };
+
+            // Pomocná fce pro součet
+            const calcSum = (selector, targetId) => {
+                const inputs = document.querySelectorAll(selector);
+                let sum = 0;
+                inputs.forEach(input => {
+                    let val = parseFloat(input.value);
+                    if (!isNaN(val)) {
+                        let max = parseFloat(input.getAttribute('max'));
+                        if (val > max) { val = max; input.value = max; }
+                        if (val < 0) { val = 0; input.value = 0; }
+                        
+                        sum += val;
+                    }
+                });
+                document.getElementById(targetId).textContent = sum.toFixed(2);
+                return sum;
+            };
+
+            const s1 = calcAverage('.calc-sec1', 'sec1-avg');
+            const s2 = calcAverage('.calc-sec2', 'sec2-avg');
+            const s3 = calcAverage('.calc-sec3', 'sec3-avg');
+            const s4 = calcSum('.calc-sec4', 'sec4-sum');
+
+            total = s1 + s2 + s3 + s4;
+            
+            // Omezíme na max 100 pro jistotu (5+5+15+75)
+            if(total > 100) total = 100;
+
+            const totalFormatted = total.toFixed(2);
+            document.getElementById('headerTotal').textContent = totalFormatted;
+            document.getElementById('floatingTotal').textContent = totalFormatted + ' / 100';
+        }
+
+        // Event listenery pro inputy 1-3
+        document.querySelectorAll('.calc-sec1, .calc-sec2, .calc-sec3').forEach(input => {
+            input.addEventListener('input', calculateAll);
+        });
+
+        // Event listenery pro dynamickou sekci 4 (volá se po jejím vytvoření)
+        function attachListenersToSec4() {
+            document.querySelectorAll('.calc-sec4').forEach(input => {
+                input.addEventListener('input', calculateAll);
+            });
+        }
+
+        // Event listener pro změnu tématu
+        document.getElementById('topicSelect').addEventListener('change', function(e) {
+            renderSection4(e.target.value);
+        });
+
+        // Inicializace při načtení
+        renderSection4('web');
+
+    </script>
+</body>
+</html>
