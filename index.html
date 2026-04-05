@@ -11,14 +11,12 @@
         @media print {
             @page {
                 size: A4 landscape;
-                /* Nulový margin na stránce skryje výchozí hlavičky a patičky prohlížeče (včetně URL) */
-                margin: 0; 
+                margin: 10mm;
             }
             body {
                 background-color: white;
                 padding: 0;
-                /* Margin přesuneme na body, aby se obsah netiskl úplně u kraje papíru */
-                margin: 10mm;
+                margin: 0;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
