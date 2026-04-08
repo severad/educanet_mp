@@ -44,7 +44,11 @@
                 margin: 0;
             }
             table {
+                page-break-inside: auto;
+            }
+            tr {
                 page-break-inside: avoid;
+                page-break-after: auto;
             }
             textarea {
                 overflow: hidden;
@@ -95,7 +99,7 @@
 <body class="bg-gray-100 font-sans text-gray-800 pb-20">
 
     <!-- Kontrolní panel -->
-    <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-center justify-between max-w-6xl mx-auto rounded-b-lg border-b border-gray-200">
+    <div id="controlPanel" class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-center justify-between max-w-6xl mx-auto rounded-b-lg border-b border-gray-200">
         <div class="flex-1 min-w-[200px]">
             <label for="topicSelect" class="block text-sm font-semibold text-gray-700 mb-1">Vyberte téma maturitní práce:</label>
             <select id="topicSelect" class="w-full max-w-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -578,6 +582,11 @@
             btn.innerHTML = 'Generuji PDF...';
             btn.disabled = true;
 
+            // Řešení pro odstaranění prázdného místa nahoře a vynucené schování horního panelu
+            const panel = document.getElementById('controlPanel');
+            panel.style.display = 'none';
+            window.scrollTo(0, 0);
+
             const element = document.getElementById('printArea');
             element.classList.add('exporting-pdf');
 
@@ -585,13 +594,14 @@
                 margin:       [10, 10, 10, 10], // mm
                 filename:     'Hodnotici_tabulka_MP.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } 
+                pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', 'td'] } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
                 element.classList.remove('exporting-pdf');
+                panel.style.display = 'flex';
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
             });
