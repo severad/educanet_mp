@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hodnotící tabulka MP 2025/26</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Knihovna pro export do PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @media print {
@@ -44,11 +43,7 @@
                 margin: 0;
             }
             table {
-                page-break-inside: auto;
-            }
-            tr {
                 page-break-inside: avoid;
-                page-break-after: auto;
             }
             textarea {
                 overflow: hidden;
@@ -98,7 +93,6 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-20">
 
-    <!-- Kontrolní panel -->
     <div id="controlPanel" class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-center justify-between max-w-6xl mx-auto rounded-b-lg border-b border-gray-200">
         <div class="flex-1 min-w-[200px]">
             <label for="topicSelect" class="block text-sm font-semibold text-gray-700 mb-1">Vyberte téma maturitní práce:</label>
@@ -139,12 +133,10 @@
         </div>
     </div>
 
-    <!-- Samotný dokument -->
     <div id="printArea" class="print-container max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-sm text-sm">
         
         <h1 class="text-2xl font-bold text-center mb-6">Hodnotící tabulka MP <span id="yearSpan" contenteditable="true" class="border-b border-dashed border-gray-400 focus:outline-none">2025/26</span></h1>
 
-        <!-- Hlavička -->
         <table class="w-full mb-1 border-collapse border border-black text-sm">
             <tbody>
                 <tr>
@@ -193,7 +185,6 @@
         </table>
         <div class="text-xs mb-4 text-gray-700">*nehodící se škrtněte</div>
 
-        <!-- Část 1 -->
         <div class="mb-4">
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
@@ -257,10 +248,8 @@
             </table>
         </div>
 
-        <!-- === ZALOMENÍ STRÁNKY PŘED ČÁSTÍ 2 === -->
         <div class="html2pdf__page-break page-break"></div>
 
-        <!-- Část 2 -->
         <div class="mb-4">
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
@@ -317,7 +306,6 @@
             </table>
         </div>
 
-        <!-- Část 3 -->
         <div class="mb-4">
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
@@ -369,10 +357,8 @@
             </table>
         </div>
 
-        <!-- === ZALOMENÍ STRÁNKY PŘED ČÁSTÍ 4 === -->
         <div class="html2pdf__page-break page-break"></div>
 
-        <!-- Část 4 (Dynamická) -->
         <div class="mb-4">
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
@@ -385,8 +371,7 @@
                     </tr>
                 </thead>
                 <tbody id="sec4-body">
-                    <!-- Bude naplněno pomocí JavaScriptu -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
@@ -575,36 +560,54 @@
 
         // --- PŘIDANÉ FUNKCE PRO UKLÁDÁNÍ A PDF ---
 
-        // 1. Export přímo do PDF
+        // 1. Export přímo do PDF s fixem pro scrollování
         function generatePDF() {
             const btn = document.getElementById('btnPdf');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = 'Generuji PDF...';
             btn.disabled = true;
 
-            // Řešení pro odstaranění prázdného místa nahoře a vynucené schování horního panelu
+            // Uložíme aktuální scrollovací pozici
+            const currentScroll = window.scrollY;
+
+            // Schováme panel před scrollováním, aby nezasahoval do výšky
             const panel = document.getElementById('controlPanel');
             panel.style.display = 'none';
+
+            // Přesuneme se fyzicky úplně nahoru
             window.scrollTo(0, 0);
 
             const element = document.getElementById('printArea');
             element.classList.add('exporting-pdf');
 
-            const opt = {
-                margin:       [10, 10, 10, 10], // mm
-                filename:     'Hodnotici_tabulka_MP.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', 'td'] } 
-            };
+            // Zásadní krok: pauza 150ms umožní prohlížeči dokončit překreslení DOMu
+            // na pozici 0,0 dřív, než html2canvas začne dělat snímek.
+            setTimeout(() => {
+                const opt = {
+                    margin:       [10, 10, 10, 10], // mm
+                    filename:     'Hodnotici_tabulka_MP.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        scrollY: 0,
+                        x: 0,
+                        y: 0
+                    },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                    pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', 'td'] } 
+                };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('exporting-pdf');
-                panel.style.display = 'flex';
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            });
+                html2pdf().set(opt).from(element).save().then(() => {
+                    element.classList.remove('exporting-pdf');
+                    panel.style.display = 'flex';
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    
+                    // Návrat přesně tam, kde uživatel skončil
+                    window.scrollTo(0, currentScroll);
+                });
+            }, 150);
         }
 
         // 2. Uložit data do Local Storage
