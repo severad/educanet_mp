@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hodnotící tabulka MP 2025/26</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @media print {
             @page {
@@ -72,20 +71,6 @@
             outline: none;
         }
         
-        .exporting-pdf input, .exporting-pdf textarea {
-            border: none !important;
-            background: transparent !important;
-            box-shadow: none !important;
-        }
-        .exporting-pdf textarea {
-            overflow: hidden;
-        }
-        
-        /* Stylizace placeholeru pri tisku/exportu aby nebyl sedivy pokud neni nic napsano */
-        .exporting-pdf input::placeholder, 
-        .exporting-pdf textarea::placeholder {
-            color: transparent;
-        }
         @media print {
             input::placeholder, textarea::placeholder { color: transparent; }
         }
@@ -116,9 +101,10 @@
                 Tisk
             </button>
 
-            <button onclick="generatePDF()" id="btnPdf" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                Uložit jako PDF
+            <!-- TLAČÍTKO PRO WORD -->
+            <button onclick="generateWord()" id="btnWord" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Uložit do Wordu
             </button>
 
             <button onclick="saveData()" id="btnSave" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11 min-w-[170px] justify-center">
@@ -248,7 +234,8 @@
             </table>
         </div>
 
-        <div class="html2pdf__page-break page-break"></div>
+        <!-- Zalomení stránky pro Word -->
+        <div class="page-break"><br style="page-break-before: always; clear: both;" /></div>
 
         <div class="mb-4">
             <table class="w-full border-collapse border border-black text-sm">
@@ -357,7 +344,8 @@
             </table>
         </div>
 
-        <div class="html2pdf__page-break page-break"></div>
+        <!-- Zalomení stránky pro Word -->
+        <div class="page-break"><br style="page-break-before: always; clear: both;" /></div>
 
         <div class="mb-4">
             <table class="w-full border-collapse border border-black text-sm">
@@ -378,13 +366,12 @@
     </div>
 
     <script>
-        // Formátování čísla pro výstup (odstraní nulová desetinná místa a vymění tečku za čárku)
+        // Formátování čísla pro výstup
         function formatNumber(num) {
             let str = parseFloat(num.toFixed(2)).toString();
             return str.replace('.', ',');
         }
 
-        // Data pro sekci 4 na základě tématu
         const topicsData = {
             "web": {
                 title: "Vývoj aplikací, webová stránka",
@@ -452,7 +439,6 @@
             }
         };
 
-        // Generování sekce 4 podle výběru v selectu
         function renderSection4(topicKey) {
             const data = topicsData[topicKey];
             document.getElementById('sec4-title').textContent = data.title;
@@ -497,13 +483,11 @@
             calculateAll();
         }
 
-        // Automatické zvětšení textarey
         function autoResize(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
         }
 
-        // Výpočet průměru / součtu na základě tříd
         function calculateAll() {
             let total = 0;
 
@@ -558,56 +542,90 @@
             document.getElementById('floatingTotal').textContent = totalFormatted + ' / 100';
         }
 
-        // --- PŘIDANÉ FUNKCE PRO UKLÁDÁNÍ A PDF ---
-
-        // 1. Export přímo do PDF s fixem pro scrollování
-        function generatePDF() {
-            const btn = document.getElementById('btnPdf');
+        // --- PŘIDANÉ FUNKCE PRO UKLÁDÁNÍ DO WORDU (.doc) ---
+        function generateWord() {
+            const btn = document.getElementById('btnWord');
             const originalHTML = btn.innerHTML;
-            btn.innerHTML = 'Generuji PDF...';
+            btn.innerHTML = 'Generuji Word...';
             btn.disabled = true;
 
-            // Uložíme aktuální scrollovací pozici
-            const currentScroll = window.scrollY;
+            // Klonujeme část stránky určenou k exportu
+            const printArea = document.getElementById('printArea');
+            const clone = printArea.cloneNode(true);
 
-            // Schováme panel před scrollováním, aby nezasahoval do výšky
-            const panel = document.getElementById('controlPanel');
-            panel.style.display = 'none';
+            // Nahrazení inputů za jejich reálné vyplněné texty
+            const originalInputs = printArea.querySelectorAll('input');
+            const clonedInputs = clone.querySelectorAll('input');
+            originalInputs.forEach((input, index) => {
+                const span = document.createElement('span');
+                span.textContent = input.value || '';
+                span.style.fontFamily = 'Arial, sans-serif';
+                clonedInputs[index].parentNode.replaceChild(span, clonedInputs[index]);
+            });
 
-            // Přesuneme se fyzicky úplně nahoru
-            window.scrollTo(0, 0);
+            // Nahrazení textareí za div s odřádkováním
+            const originalTextareas = printArea.querySelectorAll('textarea');
+            const clonedTextareas = clone.querySelectorAll('textarea');
+            originalTextareas.forEach((ta, index) => {
+                const div = document.createElement('div');
+                div.innerHTML = ta.value.replace(/\n/g, '<br>') || '<br><br>'; 
+                div.style.fontFamily = 'Arial, sans-serif';
+                clonedTextareas[index].parentNode.replaceChild(div, clonedTextareas[index]);
+            });
 
-            const element = document.getElementById('printArea');
-            element.classList.add('exporting-pdf');
+            // Odstranění modifikátorů, které by Word mátly
+            const clonedEditables = clone.querySelectorAll('[contenteditable]');
+            clonedEditables.forEach((el) => {
+                el.removeAttribute('contenteditable');
+                el.style.border = 'none';
+            });
 
-            // Zásadní krok: pauza 150ms umožní prohlížeči dokončit překreslení DOMu
-            // na pozici 0,0 dřív, než html2canvas začne dělat snímek.
-            setTimeout(() => {
-                const opt = {
-                    margin:       [10, 10, 10, 10], // mm
-                    filename:     'Hodnotici_tabulka_MP.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { 
-                        scale: 2, 
-                        useCORS: true, 
-                        scrollY: 0,
-                        x: 0,
-                        y: 0
-                    },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                    pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', 'td'] } 
-                };
+            // Kostra HTML souboru kompatibilního s Wordem, vč CSS pravidel, kterým Word rozumí
+            const htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>Hodnocení MP</title>
+                    <style>
+                        @page { size: landscape; margin: 1.5cm; }
+                        body { font-family: 'Arial', sans-serif; font-size: 10pt; color: #000; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        td, th { border: 1pt solid black; padding: 5px; vertical-align: top; }
+                        th { background-color: #e2e8f0; font-weight: bold; text-align: center; }
+                        h1 { text-align: center; font-size: 18pt; margin-bottom: 20px; font-weight: bold; }
+                        .bg-slate-200 { background-color: #e2e8f0; }
+                        .bg-slate-50 { background-color: #f8fafc; }
+                        .font-bold { font-weight: bold; }
+                        .text-center { text-align: center; }
+                        .text-xs { font-size: 8pt; color: #555; }
+                        .text-lg { font-size: 14pt; }
+                        .text-3xl { font-size: 24pt; text-align: center; vertical-align: middle; }
+                        .align-middle { vertical-align: middle; }
+                        .w-[30%] { width: 30%; }
+                        .page-break { mso-special-character: line-break; page-break-before: always; }
+                    </style>
+                </head>
+                <body>
+                    ${clone.innerHTML}
+                </body>
+                </html>
+            `;
 
-                html2pdf().set(opt).from(element).save().then(() => {
-                    element.classList.remove('exporting-pdf');
-                    panel.style.display = 'flex';
-                    btn.innerHTML = originalHTML;
-                    btn.disabled = false;
-                    
-                    // Návrat přesně tam, kde uživatel skončil
-                    window.scrollTo(0, currentScroll);
-                });
-            }, 150);
+            // Vytvoření MS Word dokumentu pomocí Blob (.doc)
+            const blob = new Blob(['\ufeff', htmlContent], {
+                type: 'application/msword'
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Hodnotici_tabulka_MP.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
         }
 
         // 2. Uložit data do Local Storage
@@ -629,7 +647,6 @@
 
             localStorage.setItem('mp_form_data', JSON.stringify(data));
 
-            // Vizuální potvrzení na tlačítku
             const btn = document.getElementById('btnSave');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '✔ Uloženo';
@@ -645,7 +662,7 @@
         function loadData() {
             const json = localStorage.getItem('mp_form_data');
             if(!json) {
-                renderSection4('web'); // Výchozí pokud není uložená cache
+                renderSection4('web'); 
                 return;
             }
             
@@ -653,7 +670,7 @@
             
             if(data.topic) {
                 document.getElementById('topicSelect').value = data.topic;
-                renderSection4(data.topic); // Nejdříve sestavíme sekci 4!
+                renderSection4(data.topic); 
             }
 
             if(data.year) document.getElementById('yearSpan').textContent = data.year;
@@ -679,7 +696,7 @@
             calculateAll();
         }
 
-        // 4. Smazat paměť - Dvoufázové potvrzení
+        // 4. Smazat paměť
         let deleteConfirm = false;
         function clearData() {
             const btn = document.getElementById('btnDelete');
@@ -698,14 +715,12 @@
                     btn.classList.replace('text-white', 'text-red-600');
                     btn.classList.replace('border-red-600', 'border-red-500');
                     btn.classList.remove('bg-red-600');
-                }, 3000); // Po 3 vteřinách se tlačítko vrátí zpět do klidu
+                }, 3000); 
             } else {
                 localStorage.removeItem('mp_form_data');
-                location.reload(); // Jednoduchý reset stránky do výchozího stavu
+                location.reload(); 
             }
         }
-
-        // --- ZÁKLADNÍ EVENT LISTENERY ---
 
         document.querySelectorAll('.calc-sec1, .calc-sec2, .calc-sec3').forEach(input => {
             input.addEventListener('input', calculateAll);
@@ -721,7 +736,6 @@
             renderSection4(e.target.value);
         });
 
-        // Inicializace při načtení
         loadData();
 
     </script>
