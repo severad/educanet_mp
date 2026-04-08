@@ -11,12 +11,12 @@
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 10mm;
+                margin: 0; 
             }
             body {
                 background-color: white;
                 padding: 0;
-                margin: 0;
+                margin: 10mm;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -51,13 +51,13 @@
             }
         }
         
-        /* Třída pro pevné zalomení stránky - platí pro tisk i generování PDF */
+        /* Třída pro pevné zalomení stránky */
         .page-break {
             page-break-before: always;
             break-before: page;
         }
 
-        /* Skrytí šipek u číselných polí pro web */
+        /* Skrytí šipek u číselných polí */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -73,7 +73,6 @@
             outline: none;
         }
         
-        /* Třída aplikovaná při generování PDF pro fixaci vzhledu */
         .exporting-pdf input, .exporting-pdf textarea {
             border: none !important;
             background: transparent !important;
@@ -82,11 +81,20 @@
         .exporting-pdf textarea {
             overflow: hidden;
         }
+        
+        /* Stylizace placeholeru pri tisku/exportu aby nebyl sedivy pokud neni nic napsano */
+        .exporting-pdf input::placeholder, 
+        .exporting-pdf textarea::placeholder {
+            color: transparent;
+        }
+        @media print {
+            input::placeholder, textarea::placeholder { color: transparent; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 pb-20">
 
-    <!-- Kontrolní panel (Při tisku se skryje) -->
+    <!-- Kontrolní panel -->
     <div class="no-print sticky top-0 bg-white shadow-md p-4 mb-8 z-50 flex flex-wrap gap-4 items-center justify-between max-w-6xl mx-auto rounded-b-lg border-b border-gray-200">
         <div class="flex-1 min-w-[200px]">
             <label for="topicSelect" class="block text-sm font-semibold text-gray-700 mb-1">Vyberte téma maturitní práce:</label>
@@ -100,7 +108,7 @@
         <div class="flex flex-wrap items-center gap-3">
             <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 text-center mr-2">
                 <span class="block text-xs text-blue-600 font-bold uppercase">Celkové skóre</span>
-                <span id="floatingTotal" class="text-2xl font-bold text-blue-800 leading-none">0.00 / 100</span>
+                <span id="floatingTotal" class="text-2xl font-bold text-blue-800 leading-none">0 / 100</span>
             </div>
 
             <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200 flex items-center gap-2 h-11">
@@ -135,7 +143,9 @@
             <tbody>
                 <tr>
                     <td class="border border-black px-2 py-1 bg-slate-200 font-semibold w-[30%]">Název maturitní práce:</td>
-                    <td class="border border-black px-2 py-1 w-[55%] relative"><input type="text" id="workTitle" class="w-full outline-none bg-transparent"></td>
+                    <td class="border border-black px-2 py-1 w-[55%] relative">
+                        <input type="text" id="workTitle" class="w-full outline-none bg-transparent font-semibold text-base">
+                    </td>
                     <td class="border border-black px-2 py-1 bg-slate-200 font-bold text-center w-[15%]">Celkem bodů</td>
                 </tr>
                 <tr>
@@ -144,31 +154,31 @@
                         <div class="border-b border-black px-2 py-1 h-8 flex items-center">
                             <input type="text" id="authorName" class="w-full h-full bg-transparent outline-none font-medium text-base">
                         </div>
-                        <div class="px-2 py-1 h-8 flex items-center">
-                            <span class="whitespace-nowrap mr-2">Podpis žáka:</span>
+                        <div class="flex">
+                            <div class="px-2 py-1 flex-1 border-r border-black flex items-center h-8">
+                                <span class="whitespace-nowrap mr-2">Podpis žáka:</span>
+                            </div>
+                            <div class="px-2 py-1 w-52 flex items-center h-8">
+                                <span class="whitespace-nowrap text-xs">Převzal(a) dne:</span>
+                                <input type="text" id="dateReceived" class="flex-1 ml-1 bg-transparent outline-none text-xs" placeholder="DD. MM. YYYY">
+                            </div>
                         </div>
                     </td>
-                    <td class="border border-black px-2 py-1 text-center text-3xl font-bold align-middle bg-slate-50" rowspan="2" id="headerTotal">0.00</td>
+                    <td class="border border-black px-2 py-1 text-center text-3xl font-bold align-middle bg-slate-50" rowspan="2" id="headerTotal">0</td>
                 </tr>
                 <tr>
                     <td class="border border-black px-2 py-1 bg-slate-200 font-semibold leading-tight">Jméno a příjmení vedoucího/<br>oponenta maturitní práce*:</td>
                     <td class="border border-black p-0 align-top">
-                        <div class="flex border-b border-black">
-                            <div class="px-2 py-1 flex-1 border-r border-black flex items-center h-8">
-                                <input type="text" id="reviewerName" class="w-full h-full bg-transparent outline-none font-medium">
-                            </div>
-                            <div class="px-2 py-1 w-48 flex items-center h-8">
-                                <span class="whitespace-nowrap text-xs">Převzal(a) dne:</span>
-                                <input type="text" id="dateReceived" class="flex-1 ml-1 bg-transparent outline-none">
-                            </div>
+                        <div class="border-b border-black px-2 py-1 h-8 flex items-center">
+                            <input type="text" id="reviewerName" class="w-full h-full bg-transparent outline-none font-medium text-base">
                         </div>
                         <div class="flex">
                             <div class="px-2 py-1 flex-1 border-r border-black flex items-center h-8">
                                 <span class="whitespace-nowrap mr-2">Podpis hodnotitele:</span>
                             </div>
-                            <div class="px-2 py-1 w-48 flex items-center h-8">
+                            <div class="px-2 py-1 w-52 flex items-center h-8">
                                 <span class="whitespace-nowrap text-xs">Vypracován dne:</span>
-                                <input type="text" id="dateReviewed" class="flex-1 ml-1 bg-transparent outline-none">
+                                <input type="text" id="dateReviewed" class="flex-1 ml-1 bg-transparent outline-none text-xs" placeholder="DD. MM. YYYY">
                             </div>
                         </div>
                     </td>
@@ -192,7 +202,7 @@
                         <td class="border border-black px-2 py-1 font-bold w-[30%] bg-slate-50">Titulní list, prohlášení a poděkování</td>
                         <td class="border border-black px-2 py-1 text-xs">správný název školy, správně uvedené jméno autora a vedoucího, celková grafická úhlednost a přehlednost</td>
                         <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec1 py-1 table-input"></td>
-                        <td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="9" id="sec1-avg">0.00</td>
+                        <td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="9" id="sec1-avg">0</td>
                     </tr>
                     <tr>
                         <td class="border border-black px-2 py-1 font-bold bg-slate-50">Strana s anotací a klíčovými slovy</td>
@@ -259,7 +269,7 @@
                         <td class="border border-black px-2 py-1 font-bold w-[30%] bg-slate-50">Překlepy</td>
                         <td class="border border-black px-2 py-1 text-xs">absence překlepů a neúmyslných chyb</td>
                         <td class="border border-black p-0 align-middle"><input type="number" min="0" max="5" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec2 py-1 table-input"></td>
-                        <td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="7" id="sec2-avg">0.00</td>
+                        <td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="7" id="sec2-avg">0</td>
                     </tr>
                     <tr>
                         <td class="border border-black px-2 py-1 font-bold bg-slate-50">Chyby v interpunkci</td>
@@ -316,7 +326,7 @@
                         <td class="border border-black px-2 py-1 font-bold w-[30%] bg-slate-50">Přístup žáka k práci</td>
                         <td class="border border-black px-2 py-1 text-xs">spolehlivost, iniciativa, komunikace s vedoucím, četnost konzultací (oponent nemůže posoudit – hodnocení neuvádí)</td>
                         <td class="border border-black p-0 align-middle"><input type="number" min="0" max="15" step="0.5" class="w-full h-full text-center outline-none bg-transparent calc-sec3 py-1 table-input"></td>
-                        <td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="6" id="sec3-avg">0.00</td>
+                        <td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="6" id="sec3-avg">0</td>
                     </tr>
                     <tr>
                         <td class="border border-black px-2 py-1 font-bold bg-slate-50">Úvod</td>
@@ -377,45 +387,51 @@
     </div>
 
     <script>
+        // Formátování čísla pro výstup (odstraní nulová desetinná místa a vymění tečku za čárku)
+        function formatNumber(num) {
+            let str = parseFloat(num.toFixed(2)).toString();
+            return str.replace('.', ',');
+        }
+
         // Data pro sekci 4 na základě tématu
         const topicsData = {
             "web": {
                 title: "Vývoj aplikací, webová stránka",
                 rows: [
-                    { name: 'Uživatelské rozhraní*', range: '0–12 bodů', desc: 'Estetika a vizuální atraktivita, uživatelská přívětivost, responzivita a přizpůsobení', max: 12 },
-                    { name: 'Zdrojový kód*', range: '0–15 bodů', desc: 'Čistota a čitelnost kódu, použití správných programovacích konvencí, efektivnost a optimalizace kódu', max: 15 },
-                    { name: 'Funkcionalita*', range: '0–15 bodů', desc: 'Kompletnost a správné fungování, odolnost proti chybám a bezpečnost, efektivní zpracování vstupů a výstupů', max: 15 },
-                    { name: 'Originalita a kreativita*', range: '0–10 bodů', desc: 'Inovativnost a originalita nápadů, kreativní použití technologií', max: 10 },
-                    { name: 'Testování a ladění*', range: '0–8 bodů', desc: 'Úplnost a efektivita testovacích scénářů, kvalita a efektivita ladění chyb', max: 8 },
-                    { name: 'Vhodnost technických řešení*', range: '0–10 bodů', desc: 'Vhodnost použitých technologií, efektivnost a správnost implementace', max: 10 },
-                    { name: 'Celkový dojem a přínos*', range: '0–5 bodů', desc: 'Celkový dojem z projektu, přínos projektu vzhledem k cílům a potřebám', max: 5 }
+                    { name: 'Uživatelské rozhraní', range: '0–12 bodů*', desc: 'Estetika a vizuální atraktivita, uživatelská přívětivost, responzivita a přizpůsobení', max: 12 },
+                    { name: 'Zdrojový kód', range: '0–15 bodů*', desc: 'Čistota a čitelnost kódu, použití správných programovacích konvencí, efektivnost a optimalizace kódu', max: 15 },
+                    { name: 'Funkcionalita', range: '0–15 bodů*', desc: 'Kompletnost a správné fungování, odolnost proti chybám a bezpečnost, efektivní zpracování vstupů a výstupů', max: 15 },
+                    { name: 'Originalita a kreativita', range: '0–10 bodů*', desc: 'Inovativnost a originalita nápadů, kreativní použití technologií', max: 10 },
+                    { name: 'Testování a ladění', range: '0–8 bodů*', desc: 'Úplnost a efektivita testovacích scénářů, kvalita a efektivita ladění chyb', max: 8 },
+                    { name: 'Vhodnost technických řešení', range: '0–10 bodů*', desc: 'Vhodnost použitých technologií, efektivnost a správnost implementace', max: 10 },
+                    { name: 'Celkový dojem a přínos', range: '0–5 bodů*', desc: 'Celkový dojem z projektu, přínos projektu vzhledem k cílům a potřebám', max: 5 }
                 ]
             },
             "sit": {
                 title: "Návrh počítačové sítě",
                 rows: [
-                    { name: 'Analýza situace*', range: '0–6 bodů', desc: 'analýza lokality pro návrh sítě a dále potřeb a požadavků firmy', max: 6 },
-                    { name: 'Návrh PC sítě*', range: '0–18 bodů', desc: 'popis řešené problematiky, správnost navrženého řešení PC sítě/sítí', max: 18 },
-                    { name: 'Zabezpečení PC sítě*', range: '0–12 bodů', desc: 'popis a teoretická funkčnost zabezpečení PC sítě/sítí proti možným útokům nebo šíření škodlivého software', max: 12 },
-                    { name: 'Zabezpečení dat firmy*', range: '0–9 bodů', desc: 'funkčnost navrhovaného řešení pro zálohy dat pracovníků firmy', max: 9 },
-                    { name: 'Nastavení DHCP serveru a IP adres*', range: '0–6 bodů', desc: 'nastavení DHCP by mělo odpovídat potřebám podniku a mít logické uspořádání; stejně tak koncová zařízení s pevně danou IP adresou', max: 6 },
-                    { name: 'Výběr HW*', range: '0–9 bodů', desc: 'použití HW vhodného k zabezpečení všech požadavků firmy', max: 9 },
-                    { name: 'Výběr síťových prvků*', range: '0–9 bodů', desc: 'použití vhodných síťových prvků pro tento typ sítě/sítí', max: 9 },
-                    { name: 'Pokrytí firmy Wi-Fi*', range: '0–6 bodů', desc: 'řešení pokrytí firmy Wi-Fi signálem pro možnost připojení k internetu odkudkoliv i pro hosty', max: 6 }
+                    { name: 'Analýza situace', range: '0–6 bodů*', desc: 'analýza lokality pro návrh sítě a dále potřeb a požadavků firmy', max: 6 },
+                    { name: 'Návrh PC sítě', range: '0–18 bodů*', desc: 'popis řešené problematiky, správnost navrženého řešení PC sítě/sítí', max: 18 },
+                    { name: 'Zabezpečení PC sítě', range: '0–12 bodů*', desc: 'popis a teoretická funkčnost zabezpečení PC sítě/sítí proti možným útokům nebo šíření škodlivého software', max: 12 },
+                    { name: 'Zabezpečení dat firmy', range: '0–9 bodů*', desc: 'funkčnost navrhovaného řešení pro zálohy dat pracovníků firmy', max: 9 },
+                    { name: 'Nastavení DHCP serveru a IP adres', range: '0–6 bodů*', desc: 'nastavení DHCP by mělo odpovídat potřebám podniku a mít logické uspořádání; stejně tak koncová zařízení s pevně danou IP adresou', max: 6 },
+                    { name: 'Výběr HW', range: '0–9 bodů*', desc: 'použití HW vhodného k zabezpečení všech požadavků firmy', max: 9 },
+                    { name: 'Výběr síťových prvků', range: '0–9 bodů*', desc: 'použití vhodných síťových prvků pro tento typ sítě/sítí', max: 9 },
+                    { name: 'Pokrytí firmy Wi-Fi', range: '0–6 bodů*', desc: 'řešení pokrytí firmy Wi-Fi signálem pro možnost připojení k internetu odkudkoliv i pro hosty', max: 6 }
                 ]
             },
             "spec": {
                 title: "Specifikace programu",
                 rows: [
-                    { name: 'Trendy*', range: '0–6 bodů', desc: 'sledování trendů v popisované oblasti, aktuálnost zvolených programů', max: 6 },
-                    { name: 'Analýza*', range: '0–6 bodů', desc: 'stanovení cílů práce, adekvátnost cílů, důvody jejich výběru', max: 6 },
-                    { name: 'Problematika*', range: '0–12 bodů', desc: 'popis problematiky, logická návaznost a provázanost částí tématu, hloubka ponoření se do problému', max: 12 },
-                    { name: 'Implementace*', range: '0–15 bodů', desc: 'rozsah a detailnost vlastního popisu, kvalita a vhodnost vlastní tvorby (obrázky/videa)', max: 15 },
-                    { name: 'Výsledky práce*', range: '0–12 bodů', desc: 'výsledky a splnění cílů z analýzy, doporučení vyplývající z práce', max: 12 },
-                    { name: 'Přínos*', range: '0–6 bodů', desc: 'využitelnost a pochopitelnost představeného materiálu', max: 6 },
-                    { name: 'Porovnání*', range: '0–6 bodů', desc: 'porovnání s jinými programy – relevantnost výběru konkurence', max: 6 },
-                    { name: 'Citace*', range: '0–6 bodů', desc: 'kvalita a množství zdrojů, relevantnost a použití uvedených zdrojů', max: 6 },
-                    { name: 'Interface*', range: '0–6 bodů', desc: 'uživatelská přívětivost, srozumitelnost a čtivost práce', max: 6 }
+                    { name: 'Trendy', range: '0–6 bodů*', desc: 'sledování trendů v popisované oblasti, aktuálnost zvolených programů', max: 6 },
+                    { name: 'Analýza', range: '0–6 bodů*', desc: 'stanovení cílů práce, adekvátnost cílů, důvody jejich výběru', max: 6 },
+                    { name: 'Problematika', range: '0–12 bodů*', desc: 'popis problematiky, logická návaznost a provázanost částí tématu, hloubka ponoření se do problému', max: 12 },
+                    { name: 'Implementace', range: '0–15 bodů*', desc: 'rozsah a detailnost vlastního popisu, kvalita a vhodnost vlastní tvorby (obrázky/videa)', max: 15 },
+                    { name: 'Výsledky práce', range: '0–12 bodů*', desc: 'výsledky a splnění cílů z analýzy, doporučení vyplývající z práce', max: 12 },
+                    { name: 'Přínos', range: '0–6 bodů*', desc: 'využitelnost a pochopitelnost představeného materiálu', max: 6 },
+                    { name: 'Porovnání', range: '0–6 bodů*', desc: 'porovnání s jinými programy – relevantnost výběru konkurence', max: 6 },
+                    { name: 'Citace', range: '0–6 bodů*', desc: 'kvalita a množství zdrojů, relevantnost a použití uvedených zdrojů', max: 6 },
+                    { name: 'Interface', range: '0–6 bodů*', desc: 'uživatelská přívětivost, srozumitelnost a čtivost práce', max: 6 }
                 ]
             }
         };
@@ -432,7 +448,7 @@
                 
                 let avgCell = '';
                 if (index === 0) {
-                    avgCell = `<td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="${data.rows.length}" id="sec4-sum">0.00</td>`;
+                    avgCell = `<td class="border border-black px-2 py-1 align-middle text-center font-bold text-lg bg-slate-50" rowspan="${data.rows.length}" id="sec4-sum">0</td>`;
                 }
 
                 tr.innerHTML = `
@@ -491,7 +507,7 @@
                     }
                 });
                 const avg = count > 0 ? (sum / count) : 0;
-                document.getElementById(targetId).textContent = avg.toFixed(2);
+                document.getElementById(targetId).textContent = formatNumber(avg);
                 return avg;
             };
 
@@ -508,7 +524,7 @@
                         sum += val;
                     }
                 });
-                document.getElementById(targetId).textContent = sum.toFixed(2);
+                document.getElementById(targetId).textContent = formatNumber(sum);
                 return sum;
             };
 
@@ -521,7 +537,7 @@
             
             if(total > 100) total = 100;
 
-            const totalFormatted = total.toFixed(2);
+            const totalFormatted = formatNumber(total);
             document.getElementById('headerTotal').textContent = totalFormatted;
             document.getElementById('floatingTotal').textContent = totalFormatted + ' / 100';
         }
@@ -544,7 +560,7 @@
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } // Nucené respektování CSS page-break vlastností a zamezení roztržení řádku (tr)
+                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
