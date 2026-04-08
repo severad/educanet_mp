@@ -102,6 +102,8 @@
                 <option value="web">Vývoj aplikací, webová stránka</option>
                 <option value="sit">Návrh počítačové sítě</option>
                 <option value="spec">Specifikace programu</option>
+                <option value="3d">3D design</option>
+                <option value="multi">Multimediální tvorba</option>
             </select>
         </div>
         
@@ -432,6 +434,31 @@
                     { name: 'Porovnání', range: '0–6 bodů*', desc: 'porovnání s jinými programy – relevantnost výběru konkurence', max: 6 },
                     { name: 'Citace', range: '0–6 bodů*', desc: 'kvalita a množství zdrojů, relevantnost a použití uvedených zdrojů', max: 6 },
                     { name: 'Interface', range: '0–6 bodů*', desc: 'uživatelská přívětivost, srozumitelnost a čtivost práce', max: 6 }
+                ]
+            },
+            "3d": {
+                title: "3D design",
+                rows: [
+                    { name: 'Modelování a vizuální kvalita', range: '0–12 bodů*', desc: 'Kvalita modelů, úroveň detailů, proporce, texturování, realistické nebo stylizované provedení.', max: 12 },
+                    { name: 'Animace a pohyb', range: '0–15 bodů*', desc: 'Přirozenost pohybu, fyzika, plynulost animací, realistické chování objektů (pokud relevantní).', max: 15 },
+                    { name: 'Osvětlení a atmosféra', range: '0–15 bodů*', desc: 'Kvalita světel, stínů, použití volumetrických efektů, podtržení atmosféry scény.', max: 15 },
+                    { name: 'Originalita a kreativita', range: '0–10 bodů*', desc: 'Inovativní řešení, unikátní design, kreativní přístup k tvorbě.', max: 10 },
+                    { name: 'Technická preciznost', range: '0–8 bodů*', desc: 'Optimalizace modelů a scén, správné UV mapování, použití efektivních technik renderování.', max: 8 },
+                    { name: 'Vhodnost použitých technologií', range: '0–10 bodů*', desc: 'Správný výběr nástrojů a technologií, efektivita workflow, použití vhodných shaderů a materiálů.', max: 10 },
+                    { name: 'Celkový dojem a přínos', range: '0–5 bodů*', desc: 'Celkový estetický a technický dojem, přínos projektu vzhledem k cíli.', max: 5 }
+                ]
+            },
+            "multi": {
+                title: "Multimediální tvorba",
+                rows: [
+                    { name: 'Vizuální a estetická kvalita', range: '0–12 bodů*', desc: 'Kvalita střihu, plynulost a logika záběrů, vizuální atraktivita, barevná úprava, efekty, práce s textem a grafikou.', max: 12 },
+                    { name: 'Zvuková stránka', range: '0–5 bodů*', desc: 'Kvalita zvuku a mixu, synchronizace zvuku s obrazem, použití hudby a zvukových efektů.', max: 5 },
+                    { name: 'Plynulost a dynamika', range: '0–15 bodů*', desc: 'Rytmus a dynamika střihu, poutavost, kreativní práce s tempem.', max: 15 },
+                    { name: 'Originalita a kreativita', range: '0–10 bodů*', desc: 'Unikátní nápady, inovativní přístup k tématu, kreativní využití efektů a technik.', max: 10 },
+                    { name: 'Technická preciznost', range: '0–8 bodů*', desc: 'Kvalita exportu (rozlišení, kodeky), absence technických chyb (artefakty, nesprávné formáty, ořezy).', max: 8 },
+                    { name: 'Technické zpracování', range: '0–10 bodů*', desc: 'Doložení kompletního projekt včetně zdrojových souborů, které umožňují nahlédnout do procesu úprav a celého editačního workflow.', max: 10 },
+                    { name: 'Vhodnost použitých technologií', range: '0–10 bodů*', desc: 'Výběr vhodného softwaru a technik pro dosažení požadovaného výsledku, správné workflow.', max: 10 },
+                    { name: 'Celkový dojem a přínos', range: '0–5 bodů*', desc: 'Jak celkově působí výsledek, do jaké míry splňuje zadání a přináší hodnotu.', max: 5 }
                 ]
             }
         };
